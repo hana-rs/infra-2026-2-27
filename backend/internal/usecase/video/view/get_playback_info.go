@@ -30,7 +30,7 @@ func (uc *VideoViewingUseCase) GetPlaybackInfo(
 		return nil, ErrVideoForbidden
 	}
 
-	url := "/api/videos/" + videoID.String() + "/stream/"
+	url := "/api/videos/" + videoID.String() + "/stream/index.m3u8"
 
 	// url, err := uc.Storage.GenerateTemporaryAccessURL(
 	// 	ctx,
