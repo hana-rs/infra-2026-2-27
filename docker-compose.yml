@@ -19,7 +19,7 @@ services:
       # NOTE: 演習のための極限的な制限
       # 実際の運用では適切な分量を与えるべき
         limits:
-          cpus: '0.01'
+          cpus: 0.01
           memory: 128M
     container_name: http-backend
     env_file:
@@ -53,7 +53,7 @@ services:
         max_attempts: 3
       resources:
         limits:
-          cpus: '2.0'
+          cpus: 2.0
           memory: 4G
     cpuset: "0-1"
     container_name: worker-backend
@@ -76,11 +76,6 @@ services:
     restart: unless-stopped
     cap_add:
       - NET_ADMIN  # tcコマンド実行に必須
-    entrypoint: >
-      /bin/sh -c "
-      tc qdisc add dev eth0 root tbf rate 100mbit burst 32kbit latency 100ms && 
-      nginx -g 'daemon off;'
-      "
 
   postgres:
     image: postgres:16-alpine
@@ -176,8 +171,51 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: 0.5
           memory: 128M
+
+  delivery-node-1:
+    build:
+      context: ./delivery-node
+    container_name: delivery-node-1
+    ports:
+      - "8101:80"
+    depends_on:
+      - backend-http
+    networks:
+      - internal
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN  # tcコマンド実行に必須
+
+  delivery-node-2:
+    build:
+      context: ./delivery-node
+    container_name: delivery-node-2
+    ports:
+      - "8102:80"
+    depends_on:
+      - backend-http
+    networks:
+      - internal
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN  # tcコマンド実行に必須
+
+  delivery-node-3:
+    build:
+      context: ./delivery-node
+    container_name: delivery-node-3
+    ports:
+      - "8103:80"
+    depends_on:
+      - backend-http
+    networks:
+      - internal
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN  # tcコマンド実行に必須
+
 networks:
   internal:
     driver: bridge
